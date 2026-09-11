@@ -57,6 +57,7 @@ require("telescope").setup({
     },
     mappings = {
       i = {
+        ["<C-w>"] = require("telescope.actions").close,
         ["<C-a>"] = select_prompt_text,
         ["<A-w>"] = open_file("leftabove new"),
         ["<A-a>"] = open_file("leftabove vnew"),
@@ -69,6 +70,7 @@ require("telescope").setup({
         ["<cr>"] = open_file("tab drop")
       },
       n = {
+        ["<C-w>"] = require("telescope.actions").close,
         ["<A-w>"] = open_file("leftabove new"),
         ["<A-a>"] = open_file("leftabove vnew"),
         ["<A-s>"] = open_file("rightbelow new"),

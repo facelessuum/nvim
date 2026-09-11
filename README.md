@@ -237,7 +237,7 @@ line in the current file. All text is searchable, including names and values.
 | `?` | Normal | Show picker shortcut help |
 | `gg` / Shift+G | Normal | First / last result |
 | Shift+H / Shift+M / Shift+L | Normal | Top / middle / bottom of results |
-| Ctrl+W | Insert | Delete the previous word in the search prompt (picker-local override) |
+| Ctrl+W | Insert, Normal | Close Telescope |
 | Ctrl+R, then Ctrl+W / Ctrl+A / Ctrl+F / Ctrl+L | Insert | Insert original editor word / WORD / filename / line into query |
 | Ctrl+J | Insert | No action; Telescope blocks newlines in its prompt |
 | Left-click / double-click | Insert, Normal | Select / open a result using the picker's mouse action |
