@@ -450,6 +450,42 @@ Pylance defaults. Undefined names, unresolved imports, and syntax errors still
 appear. Project Pyright settings can enable stricter checking. Outdated versioned
 diagnostic reports are ignored; current empty reports clear inline errors.
 
+### JSON inline errors
+
+Install the JSON language server with `:MasonInstall json-lsp`, then restart
+Neovim. JSON and JSONC files show syntax errors inline as you edit, including
+standalone files outside a project. Prettier formats JSON but does not provide
+these diagnostics.
+
+### Inline errors for other file types
+
+Inline diagnostics are enabled globally, including while typing. Install the
+servers for the languages you use, then restart Neovim:
+
+| File types | Neovim install command |
+| --- | --- |
+| JavaScript / TypeScript / JSX / TSX | `:MasonInstall typescript-language-server` |
+| Lua | `:MasonInstall lua-language-server` |
+| HTML | `:MasonInstall html-lsp` |
+| CSS / SCSS / Less | `:MasonInstall css-lsp` |
+| YAML | `:MasonInstall yaml-language-server` |
+| TOML | `:MasonInstall taplo` |
+| Shell scripts | `:MasonInstall bash-language-server shellcheck` |
+| Markdown | `:MasonInstall marksman` |
+| Go | `:MasonInstall gopls` |
+| Rust | `:MasonInstall rust-analyzer` |
+| C / C++ | `:MasonInstall clangd` |
+| PHP | `:MasonInstall intelephense` |
+| Ruby | `:MasonInstall ruby-lsp` |
+
+Diagnostics depend on the server: Markdown mainly checks links, not prose;
+HTML is not a comprehensive HTML validator. ShellCheck supplies shell linting
+through the Bash server. Some servers require project roots, dependencies, or
+language toolchains (for example Go, Rust, and Ruby). C/C++ projects may need
+`compile_commands.json` for accurate results. Use `:checkhealth vim.lsp` to
+check server availability and attachment. File types not listed here or in the
+Python/JSON sections need additional language-specific setup.
+
 ### Configuration locations
 
 Editor shortcuts live in `lua/core/keymaps.lua`. Terminal shortcuts live in

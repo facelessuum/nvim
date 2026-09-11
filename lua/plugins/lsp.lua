@@ -53,6 +53,30 @@ vim.lsp.config("ts_ls", {
 
 vim.lsp.enable({ "tsc", "ts_ls" })
 
+-- Supply syntax diagnostics for JSON and JSONC, including standalone files.
+vim.lsp.config("jsonls", {
+  settings = { json = { validate = { enable = true } } },
+})
+vim.lsp.enable("jsonls")
+
+-- Error Lens uses diagnostics from these servers, not the formatters.
+-- Install the corresponding executables through Mason (see README).
+vim.lsp.config("lua_ls", {
+  settings = {
+    Lua = {
+      diagnostics = { globals = { "vim" } },
+      workspace = { checkThirdParty = false },
+    },
+  },
+})
+vim.lsp.config("yamlls", {
+  settings = { yaml = { validate = true } },
+})
+vim.lsp.enable({
+  "lua_ls", "html", "cssls", "yamlls", "taplo", "bashls", "marksman",
+  "gopls", "rust_analyzer", "clangd", "intelephense", "ruby_lsp",
+})
+
 -- Use the project's environment even when it was not activated before nvim.
 local pyright_attach = vim.lsp.config.pyright.on_attach
 vim.lsp.config("pyright", {
