@@ -59,6 +59,9 @@ map("n", "<C-r>", "diw", { desc = "Delete word" })
 map("i", "<C-r>", "<C-o>diw", { desc = "Delete word" })
 map("x", "<C-r>", "<Esc>diw", { desc = "Delete word" })
 
+-- Select the entire buffer from Normal or Insert mode.
+map({ "n", "i" }, "<C-a>", "<Esc>ggVG", { desc = "Select all lines" })
+
 -- Lines Shortcuts
 map("n", "<S-Tab>", "<<", { desc = "Unindent line" })
 map("i", "<S-Tab>", "<C-d>", { desc = "Unindent line" })

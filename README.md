@@ -177,6 +177,7 @@ editor, opens a right split in Telescope, and cycles sessions in the terminal.
 | Ctrl+V | Normal, Insert | Paste from the system clipboard and enter Insert mode |
 | Ctrl+Z | Normal, Insert | Undo and enter Insert mode |
 | Ctrl+Y | Normal, Insert | Redo |
+| Ctrl+A | Normal, Insert | Select all lines in the current file (enter Visual Line mode) |
 | Shift+Tab | Normal, Insert, Visual | Unindent line or selection |
 | Ctrl+R | Normal, Insert, Visual | Delete the whole word under the cursor (Visual selection ends first) |
 | Alt+F | Normal, Insert, Visual | Format current file or selected range |
