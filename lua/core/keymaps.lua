@@ -41,6 +41,22 @@ end
 
 -- Shortcuts
 
+-- Show the type, signature, and documentation for the symbol under the cursor.
+map({ "n", "i" }, "<C-t>", function()
+  vim.lsp.buf.hover({ border = "rounded" })
+end, { desc = "Show symbol type and documentation" })
+
+-- Automatically show hover when the text cursor pauses in Normal mode.
+vim.opt.updatetime = 500
+vim.api.nvim_create_autocmd("CursorHold", {
+  group = vim.api.nvim_create_augroup("SymbolTypeHover", { clear = true }),
+  callback = function(event)
+    if vim.bo[event.buf].buftype ~= "" then return end
+    if #vim.lsp.get_clients({ bufnr = event.buf, method = "textDocument/hover" }) == 0 then return end
+    vim.lsp.buf.hover({ border = "rounded", focusable = false, silent = true })
+  end,
+})
+
 -- Navigation
 map({ "n", "i" }, "<A-CR>", vim.lsp.buf.definition, {
   desc = "Go to definition of symbol under cursor",
