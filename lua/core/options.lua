@@ -11,8 +11,8 @@ vim.opt.mouse = "a"
 vim.opt.clipboard = "unnamedplus"
 -- Let arrow keys (including Alt+A/D) cross line boundaries in all editing modes.
 vim.opt.whichwrap:append("<,>,[,]")
-vim.opt.tabstop = 2
-vim.opt.shiftwidth = 2
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 
 -- Dotenv variants use the installed Bash parser and shell syntax highlighting.

@@ -123,7 +123,7 @@ vim.lsp.config("pyright", {
         useLibraryCodeForTypes = true,
         -- Match Pylance defaults; ty indexes unopened files for completion.
         diagnosticMode = "openFilesOnly",
-        typeCheckingMode = "strict",
+        typeCheckingMode = "off",
       },
     },
   },

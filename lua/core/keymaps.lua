@@ -81,6 +81,7 @@ map({ "n", "i" }, "<C-a>", "<Esc>ggVG", { desc = "Select all lines" })
 -- Lines Shortcuts
 map("n", "<S-Tab>", "<<", { desc = "Unindent line" })
 map("i", "<S-Tab>", "<C-d>", { desc = "Unindent line" })
+map("x", "<Tab>", ">gv", { desc = "Indent selection" })
 map("x", "<S-Tab>", "<gv", { desc = "Unindent selection" })
 map({"n", "i"}, "<A-q>", "<ESC>mzyyp`zi", { desc = "Duplicate line below" })
 map({"n", "i"}, "<A-e>", "<ESC>mzyyP`zi", { desc = "Duplicate line above" })
