@@ -8,7 +8,7 @@
   "build": "npm run build",
   "pdev": "pnpm run dev",
   "pstart": "pnpm run start",
-  "disco": "conda activate ie-ai-2-cpu",
+  "disco": "cd /home/umm/projects/ie-ai-2 && conda activate ie-ai-2-cpu",
   "pbuild": "pnpm run build",
   "gpt": "google-chrome https://chat.openai.com/ && exit",
   "deepseek": "google-chrome https://chat.deepseek.com/ && exit",
