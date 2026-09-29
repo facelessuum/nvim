@@ -3,6 +3,46 @@ vim.lsp.config("*", {
   capabilities = require("blink.cmp").get_lsp_capabilities(),
 })
 
+-- Start only servers installed on this machine, so a fresh or minimal computer
+-- does not raise "Spawning language server ... failed" for every missing one.
+local server_executables = {
+  ts_ls = "typescript-language-server",
+  jsonls = "vscode-json-language-server",
+  html = "vscode-html-language-server",
+  cssls = "vscode-css-language-server",
+  yamlls = "yaml-language-server",
+  lua_ls = "lua-language-server",
+  taplo = "taplo",
+  bashls = "bash-language-server",
+  marksman = "marksman",
+  gopls = "gopls",
+  rust_analyzer = "rust-analyzer",
+  clangd = "clangd",
+  intelephense = "intelephense",
+  ruby_lsp = "ruby-lsp",
+  pyright = "pyright-langserver",
+  ty = "ty",
+}
+local wanted = {}
+local function enable(names)
+  for _, name in ipairs(type(names) == "table" and names or { names }) do
+    wanted[name] = true
+    local executable = server_executables[name]
+    if not executable or vim.fn.executable(executable) == 1 then
+      vim.lsp.enable(name)
+    end
+  end
+end
+-- Pick up servers installed through :Mason without restarting Neovim.
+local ok, registry = pcall(require, "mason-registry")
+if ok then
+  registry:on("package:install:success", vim.schedule_wrap(function()
+    for name in pairs(wanted) do
+      if not vim.lsp.is_enabled(name) then enable(name) end
+    end
+  end))
+end
+
 -- Preserve lspconfig's monorepo root detection and Deno exclusions.
 local project_root = vim.lsp.config.ts_ls.root_dir
 local native_bins = {}
@@ -51,13 +91,13 @@ vim.lsp.config("ts_ls", {
   },
 })
 
-vim.lsp.enable({ "tsc", "ts_ls" })
+enable({ "tsc", "ts_ls" })
 
 -- Supply syntax diagnostics for JSON and JSONC, including standalone files.
 vim.lsp.config("jsonls", {
   settings = { json = { validate = { enable = true } } },
 })
-vim.lsp.enable("jsonls")
+enable("jsonls")
 
 -- Error Lens uses diagnostics from these servers, not the formatters.
 -- Install the corresponding executables through Mason (see README).
@@ -72,7 +112,7 @@ vim.lsp.config("lua_ls", {
 vim.lsp.config("yamlls", {
   settings = { yaml = { validate = true } },
 })
-vim.lsp.enable({
+enable({
   "lua_ls", "html", "cssls", "yamlls", "taplo", "bashls", "marksman",
   "gopls", "rust_analyzer", "clangd", "intelephense", "ruby_lsp",
 })
@@ -128,7 +168,7 @@ vim.lsp.config("pyright", {
     },
   },
 })
-vim.lsp.enable("pyright")
+enable("pyright")
 
 -- ty supplies indexed auto-imports for project code and installed packages.
 -- Pyright remains responsible for diagnostics and the other language features.
@@ -159,4 +199,4 @@ vim.lsp.config("ty", {
     },
   },
 })
-vim.lsp.enable("ty")
+enable("ty")
