@@ -1,6 +1,7 @@
 {
   "f": "xdg-open .",
-  "calias": "cd ~/.config/nvim/alias",
+  "calias": "cd \"$NVIM_CONFIG_DIR/alias\"",
+  "vimconfig": "cd \"$NVIM_CONFIG_DIR\"",
   "e": "nvim",
   "c": "clear",
   "dev": "npm run dev",
@@ -8,16 +9,10 @@
   "build": "npm run build",
   "pdev": "pnpm run dev",
   "pstart": "pnpm run start",
-  "disco": "cd /home/umm/projects/ie-ai-2 && conda activate ie-ai-2-cpu",
   "pbuild": "pnpm run build",
-  "gpt": "google-chrome https://chat.openai.com/ && exit",
-  "deepseek": "google-chrome https://chat.deepseek.com/ && exit",
-  "gg": "sudo systemctl start mysql && (cd /home/umm/projects/stylus && code .) && exit",
+  "gpt": "xdg-open https://chat.openai.com/ && exit",
+  "deepseek": "xdg-open https://chat.deepseek.com/ && exit",
   "ie-res": "pnpm clear && pnpm i && pnpm build && pnpm dev",
-  "ie": "cd /home/umm/projects/ie-t3 && code . && exit",
-  "petus": "ssh root@195.35.7.102",
-  "vimconfig": "cd ~/.config/nvim",
   "pewpew": "source .venv/bin/activate",
   "pew": "deactivate"
 }
-

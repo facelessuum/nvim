@@ -1,0 +1,4 @@
+{
+  "myproject": "cd ~/projects/myproject && code .",
+  "myserver": "ssh user@example.com"
+}

@@ -1,24 +1,34 @@
 #!/usr/bin/env bash
+# Register this checkout's aliases in ~/.bashrc, wherever the repo was cloned.
 set -euo pipefail
 
 command -v jq >/dev/null || { echo 'Missing jq; install it first.' >&2; exit 1; }
 ALIAS_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-JSON="$ALIAS_DIR/aliases.json"
-# Fail before editing shell configuration if the alias file is invalid.
-jq -e 'type == "object" and all(.[]; type == "string")' "$JSON" >/dev/null
+# Fail before editing shell configuration if an alias file is invalid.
+for json in "$ALIAS_DIR/aliases.json" "$ALIAS_DIR/aliases.local.json"; do
+  [[ -f "$json" ]] || continue
+  jq -e 'type == "object" and all(.[]; type == "string")' "$json" >/dev/null \
+    || { echo "Invalid alias file: $json" >&2; exit 1; }
+done
 
-# Keep the existing loader on machines where it was already registered.
-if ! grep -q 'load_json_aliases' "$HOME/.bashrc" 2>/dev/null; then
-  {
-    printf '\nload_json_aliases() {\n'
-    printf '    local alias_file=%q\n' "$JSON"
-    printf '%s\n' '    if command -v jq >/dev/null && [ -f "$alias_file" ]; then'
-    printf '%s\n' '        eval "$(jq -r '\''to_entries[] | "alias \(.key)=\(.value | @sh)"'\'' "$alias_file")"'
-    printf '%s\n' '    fi' '}' 'load_json_aliases'
-  } >> "$HOME/.bashrc"
-  echo 'Added JSON alias loader to ~/.bashrc.'
+LINE="[ -f $(printf '%q' "$ALIAS_DIR/load.sh") ] && . $(printf '%q' "$ALIAS_DIR/load.sh") # nvim-config aliases"
+BASHRC="$HOME/.bashrc"
+touch "$BASHRC"
+if grep -qF '# nvim-config aliases' "$BASHRC"; then
+  # Update the path in case the repo moved.
+  tmp=$(mktemp)
+  grep -vF '# nvim-config aliases' "$BASHRC" > "$tmp" || true
+  printf '%s\n' "$LINE" >> "$tmp"
+  cat "$tmp" > "$BASHRC"
+  rm -f "$tmp"
+  echo 'Updated alias loader in ~/.bashrc.'
 else
-  echo 'JSON alias loader already registered in ~/.bashrc.'
+  printf '\n%s\n' "$LINE" >> "$BASHRC"
+  echo 'Added alias loader to ~/.bashrc.'
 fi
+if grep -q '^load_json_aliases() {' "$BASHRC"; then
+  echo 'Note: ~/.bashrc also has an older load_json_aliases block; you can delete it.'
+fi
+echo 'Per-machine aliases go in alias/aliases.local.json (see aliases.local.example.json).'
 # Do not source .bashrc here: a child process cannot change its parent shell.
 echo 'Open a new Bash terminal or run: source ~/.bashrc'
