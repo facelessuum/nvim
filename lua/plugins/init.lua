@@ -104,6 +104,9 @@ require("lazy").setup({
 
   {
     "nvim-treesitter/nvim-treesitter",
+    -- The default branch (main) is a rewrite requiring Neovim 0.12+.
+    branch = "master",
+    lazy = false,
     build = ":TSUpdate",
     config = function()
       require("plugins.treesitter")
