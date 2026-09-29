@@ -42,7 +42,7 @@ require("conform").setup({
           path = ctx.dirname,
           upward = true,
           type = "file",
-        })[1] or (vim.fn.stdpath("config") .. "/lua/plugins/php-cs-fixer.php")
+        })[1] or (vim.g.config_dir .. "/lua/plugins/php-cs-fixer.php")
         return { "fix", "--config=" .. config, "--using-cache=no", "$FILENAME" }
       end,
     },

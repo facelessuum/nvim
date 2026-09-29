@@ -3,6 +3,8 @@
 local source = debug.getinfo(1, "S").source:sub(2)
 local config_dir = vim.fn.fnamemodify(source, ":p:h")
 vim.opt.runtimepath:prepend(config_dir)
+-- Other modules use this instead of assuming ~/.config/nvim.
+vim.g.config_dir = config_dir
 
 -- Load core settings
 require("core.options")
