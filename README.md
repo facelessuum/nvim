@@ -16,28 +16,28 @@ nvim
 ```
 
 - Install Git first (`sudo apt install git` on Ubuntu/Debian).
-- Run setup as your normal user; it requests sudo when needed. Supports Linux
-  x86_64/ARM64, installs Neovim **0.11.4**, and registers Bash aliases.
-- Ubuntu/Debian prerequisites are installed automatically. Elsewhere, install
-  curl, tar, Git, make, a C compiler, ripgrep, and jq yourself.
-- Already have Neovim **0.11.4+** and the prerequisites? Skip `setup.sh` (also on macOS).
-- Wait for plugins and parsers to install on first launch. Press `q` to close Lazy.
-- Review personal shortcuts in `alias/aliases.json`; run `source ~/.bashrc` in Bash
-  to enable aliases such as `e` for `nvim`.
-- Use a Nerd Font for icons and a clipboard provider such as `xclip` (X11) or
-  `wl-clipboard` (Wayland).
+- Run setup as your normal user. It uses sudo if available; without sudo it
+  installs Neovim **0.11.4** into `~/.local`. Supports Linux x86_64/ARM64
+  (apt, dnf, pacman, zypper, apk) and macOS (Homebrew).
+- Setup installs the prerequisites: Git, curl, tar, unzip, make, a C compiler,
+  ripgrep, jq, Node.js/npm, and Python with venv. It skips Neovim if you already
+  have 0.11.4+, and links `~/.config/nvim` to the checkout if you cloned elsewhere.
+- Neovim **0.12+ is not supported yet** (nvim-treesitter is pinned to its `master` branch).
+- On first launch, plugins, Treesitter parsers, and language servers/formatters
+  (via Mason) install automatically. Missing runtimes are reported instead of
+  failing; servers that are not installed are skipped. Press `q` to close Lazy.
+- Shared aliases live in `alias/aliases.json`. Put machine-specific ones (project
+  paths, SSH hosts) in `alias/aliases.local.json`, which Git ignores; see
+  `alias/aliases.local.example.json`. Run `source ~/.bashrc` to load them.
+- Use a Nerd Font for icons. Clipboard uses `wl-clipboard`/`xclip`/`xsel` on a
+  desktop; over SSH or without a display it copies through the terminal (OSC 52).
 
-Install the language servers and formatters you need **inside Neovim**, for example:
+Use `:Mason` for optional tools (gopls, rust-analyzer, clangd, …), `:checkhealth`
+for problems, and `:ConformInfo` for formatter status. After `git pull`, run
+`:Lazy restore` to match `lazy-lock.json`.
 
-```vim
-:MasonInstall typescript-language-server pyright ty json-lsp
-:MasonInstall prettier stylua ruff shfmt
-```
-
-Use `:Mason` for other tools, `:checkhealth` for problems, and `:ConformInfo` for
-formatter status. Tools may need separate runtimes and project dependencies.
-Restart after installing servers. After `git pull`, use `:Lazy restore` to match
-`lazy-lock.json`.
+If a Treesitter install fails (for example `mv: cannot stat tree-sitter-lua-tmp/...`),
+run `:Lazy restore`, then `:TSUpdate`.
 
 ## Keybindings
 
