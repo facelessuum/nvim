@@ -30,14 +30,15 @@ require("telescope").setup({
       -- Honor .gitignore even in folders without a Git repository.
       hidden = true,
       -- Merge normal results with explicit environment-file exceptions.
-      find_command = {
+      -- Without ripgrep, let Telescope fall back to fd/find.
+      find_command = vim.fn.executable("rg") == 1 and {
         "sh", "-c", [[
           {
             rg --files --hidden --color never --no-require-git --glob '!.git'
             rg --files --hidden --color never --no-require-git --glob '.env' --glob '.env.*' --glob '.envrc' --glob '!.git'
           } | sort -u
         ]],
-      },
+      } or nil,
     },
   },
   extensions = {
@@ -85,7 +86,8 @@ require("telescope").setup({
   }
 })
 
-require("telescope").load_extension("fzf")
+-- The native sorter is compiled with make; fall back to the Lua sorter if the build failed.
+pcall(require("telescope").load_extension, "fzf")
 
 vim.keymap.set({ "n", "i" }, "<C-e>", "<cmd>Telescope find_files<CR>", {
   desc = "Find files",
