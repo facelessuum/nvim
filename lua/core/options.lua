@@ -10,10 +10,7 @@ vim.opt.mouse = "a"
 -- Share copies, cuts, and pastes with desktop applications.
 vim.opt.clipboard = "unnamedplus"
 -- Over SSH or on headless servers, copy through the terminal (OSC 52) instead.
-local has_clipboard_tool = vim.fn.executable("wl-copy") == 1 or vim.fn.executable("xclip") == 1
-  or vim.fn.executable("xsel") == 1 or vim.fn.executable("pbcopy") == 1
-local has_display = vim.env.WAYLAND_DISPLAY or vim.env.DISPLAY or vim.fn.has("mac") == 1
-if vim.env.SSH_TTY or not (has_clipboard_tool and has_display) then
+if require("core.platform").clipboard() == "osc52" then
   local osc52 = require("vim.ui.clipboard.osc52")
   -- Many terminals refuse OSC 52 reads, so paste Neovim's own last copy.
   local last = { {}, "v" }

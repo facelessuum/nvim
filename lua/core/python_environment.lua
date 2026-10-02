@@ -21,9 +21,9 @@ function M.find(root)
     end
   end
   for _, environment in ipairs(environments) do
-    local executable = environment .. "/bin/python"
-    if vim.fn.executable(executable) == 1 then
-      return executable
+    for _, suffix in ipairs({ "/bin/python", "/Scripts/python.exe", "/python.exe" }) do
+      local executable = environment .. suffix
+      if vim.fn.executable(executable) == 1 then return executable end
     end
   end
   local executable = vim.fn.exepath("python3")

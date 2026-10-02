@@ -1,4 +1,6 @@
 require("blink.cmp").setup({
+  -- Completion must also work on architectures without a prebuilt Rust matcher.
+  fuzzy = { implementation = "prefer_rust" },
   keymap = {
     preset = "default",
     ["<S-Tab>"] = { "fallback" },

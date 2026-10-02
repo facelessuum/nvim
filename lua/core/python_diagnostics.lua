@@ -8,7 +8,8 @@ function M.publish(err, result, ctx, config)
   local bufnr = vim.fn.bufnr(vim.uri_to_fname(result.uri))
   if not client or client:is_stopped() or bufnr == -1
     or not vim.lsp.buf_is_attached(bufnr, ctx.client_id) then return end
-  if type(result.version) == "number" and result.version < vim.lsp.util.buf_versions[bufnr] then
+  local version = vim.lsp.util.buf_versions[bufnr]
+  if type(result.version) == "number" and type(version) == "number" and result.version < version then
     return
   end
   -- Empty current reports must reach the normal handler to clear all displays.

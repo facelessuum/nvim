@@ -80,7 +80,14 @@ require("lazy").setup({
     "nvim-telescope/telescope.nvim",
     dependencies = {
       "nvim-lua/plenary.nvim",
-      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+      {
+        "nvim-telescope/telescope-fzf-native.nvim",
+        -- Native sorting is optional; the Lua sorter works without build tools.
+        cond = function()
+          return vim.fn.executable("make") == 1 and #require("core.platform").compilers() > 0
+        end,
+        build = "make",
+      },
     },
     config = function()
       require("plugins.telescope")
