@@ -1,5 +1,5 @@
 {
-  "f": "xdg-open .",
+  "f": "nvim_config_open .",
   "calias": "cd \"$NVIM_CONFIG_DIR/alias\"",
   "vimconfig": "cd \"$NVIM_CONFIG_DIR\"",
   "e": "nvim",
@@ -10,8 +10,8 @@
   "pdev": "pnpm run dev",
   "pstart": "pnpm run start",
   "pbuild": "pnpm run build",
-  "gpt": "xdg-open https://chat.openai.com/ && exit",
-  "deepseek": "xdg-open https://chat.deepseek.com/ && exit",
+  "gpt": "nvim_config_open https://chat.openai.com/ && exit",
+  "deepseek": "nvim_config_open https://chat.deepseek.com/ && exit",
   "ie-res": "pnpm clear && pnpm i && pnpm build && pnpm dev",
   "pewpew": "source .venv/bin/activate",
   "pew": "deactivate"

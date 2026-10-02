@@ -3,6 +3,20 @@
 NVIM_CONFIG_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 export NVIM_CONFIG_DIR
 
+# Desktop opener differs between Linux, macOS, and WSL.
+nvim_config_open() {
+    if command -v xdg-open >/dev/null; then
+        xdg-open "$@"
+    elif command -v open >/dev/null; then
+        open "$@"
+    elif command -v explorer.exe >/dev/null; then
+        explorer.exe "$@"
+    else
+        printf 'No desktop opener available on this machine.\n' >&2
+        return 1
+    fi
+}
+
 load_json_aliases() {
     command -v jq >/dev/null || return 0
     local alias_file
