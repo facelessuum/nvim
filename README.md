@@ -45,6 +45,8 @@ nvim
   replaced checkouts are preserved under Neovim's data directory in
   `treesitter-backups/`, outside Lazy's cleanup directory. Close Neovim before
   rerunning setup. Git and internet access are needed for a replacement.
+  Setup isolates inherited Git repository variables and disables sparse checkout
+  for the replacement without changing your global Git settings.
   The runtime config also detects both APIs: a newer checkout uses its own API
   on Neovim 0.12+, while an incompatible or missing checkout produces a recovery
   warning instead of this missing-module startup error. The pinned legacy
@@ -97,11 +99,25 @@ again, then reopen Neovim. For parser installation failures (for example
 `mv: cannot stat tree-sitter-lua-tmp/...`), run `:Lazy restore`, restart Neovim,
 then run `:TSUpdate`.
 
+If setup cannot verify the lockfile revision as a legacy Treesitter revision,
+check `git diff -- lazy-lock.json`: a local Lazy update may have changed the
+commit without changing the branch label. Setup prints the selected SHA and
+Git's error instead of assuming this is a network failure. To restore the
+repository's tested plugin versions (this resets local lockfile updates), back
+up the lockfile first:
+
+```bash
+cp lazy-lock.json "$HOME/nvim-lazy-lock.backup-$(date +%s).json"
+git restore --source=HEAD -- lazy-lock.json
+bash setup.sh
+```
+
 ### Offline regression checks
 
 ```bash
 nvim --headless -u NONE -l tests/portability.lua
 nvim --headless -u NONE -l tests/treesitter_setup.lua
+bash tests/treesitter_checkout.sh
 bash tests/setup.sh
 bash -n setup.sh alias/load.sh alias/setup_alias_loader.sh
 ```

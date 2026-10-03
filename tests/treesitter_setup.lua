@@ -4,7 +4,10 @@ local root = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h:h")
 local pinned = vim.json.decode(table.concat(vim.fn.readfile(root .. "/lazy-lock.json"), "\n"))["nvim-treesitter"].commit
 local temporary = vim.fn.tempname()
 local original = { system = vim.fn.system, stdpath = vim.fn.stdpath, cmd = vim.cmd }
-local data, plugin, revisions, commands, clone_fails, checkout_fails, exit_status
+local data, plugin, revisions, commands, clone_fails, checkout_fails, missing_blob, missing_file, exit_status
+local git_variables = { "GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES" }
+local environment = {}
+for _, name in ipairs(git_variables) do environment[name] = vim.env[name] end
 local count = 0
 
 vim.fn.stdpath = function(name)
@@ -18,6 +21,7 @@ end
 vim.fn.system = function(command)
   table.insert(commands, command)
   assert(command[1] == "git")
+  for _, name in ipairs(git_variables) do assert(vim.env[name] == nil, name .. " was not isolated") end
   original.system({ "/bin/sh", "-c", "exit 0" })
   if command[2] == "clone" then
     if clone_fails then
@@ -28,12 +32,22 @@ vim.fn.system = function(command)
     assert(vim.tbl_contains(command, "master"))
     local staging = command[#command]
     vim.fn.mkdir(staging .. "/lua/nvim-treesitter", "p")
-    vim.fn.writefile({ "return {}" }, staging .. "/lua/nvim-treesitter/configs.lua")
+    if not missing_file then vim.fn.writefile({ "return {}" }, staging .. "/lua/nvim-treesitter/configs.lua") end
     return ""
   end
   assert(command[2] == "-C")
   if command[4] == "rev-parse" then return revisions[command[3]] or "wrong-revision" end
-  assert(command[4] == "checkout" and command[5] == "--detach" and command[6] == pinned)
+  if command[4] == "cat-file" then
+    assert(command[5] == "-e" and command[6] == pinned .. ":lua/nvim-treesitter/configs.lua")
+    if missing_blob then
+      original.system({ "/bin/sh", "-c", "exit 1" })
+      return "fatal: path lua/nvim-treesitter/configs.lua does not exist in revision"
+    end
+    return ""
+  end
+  assert(command[4] == "--work-tree=" .. command[3])
+  assert(command[5] == "-c" and command[6] == "core.sparseCheckout=false")
+  assert(command[7] == "checkout" and command[8] == "--detach" and command[9] == pinned)
   if checkout_fails then
     original.system({ "/bin/sh", "-c", "exit 1" })
     return "simulated checkout failure"
@@ -45,7 +59,7 @@ local function test(name, fn)
   count = count + 1
   data = temporary .. "/" .. count
   plugin = data .. "/lazy/nvim-treesitter"
-  revisions, commands, clone_fails, checkout_fails, exit_status = {}, {}, false, false, nil
+  revisions, commands, clone_fails, checkout_fails, missing_blob, missing_file, exit_status = {}, {}, false, false, false, false, nil
   fn()
   print("ok " .. count .. " - " .. name)
 end
@@ -79,7 +93,7 @@ local ok, err = xpcall(function()
   end)
   test("fresh installation uses the pinned legacy revision", function()
     repair()
-    assert(not exit_status and #commands == 2)
+    assert(not exit_status and #commands == 3)
     assert(vim.fn.filereadable(plugin .. "/lua/nvim-treesitter/configs.lua") == 1)
   end)
   test("new API installation is replaced and preserved outside Lazy", function()
@@ -97,6 +111,33 @@ local ok, err = xpcall(function()
     revisions[plugin] = pinned
     repair()
     repaired_with_backup()
+  end)
+  test("inherited Git environment is isolated and restored", function()
+    for _, name in ipairs(git_variables) do vim.env[name] = "/inherited/" .. name end
+    repair()
+    assert(not exit_status)
+    for _, name in ipairs(git_variables) do
+      assert(vim.env[name] == "/inherited/" .. name, name .. " was not restored")
+      vim.env[name] = environment[name]
+    end
+  end)
+  test("a lockfile revision without the legacy module is rejected safely", function()
+    existing(true)
+    missing_blob = true
+    repair()
+    assert(exit_status == 1 and #commands == 3)
+    assert(vim.fn.filereadable(plugin .. "/marker") == 1)
+    assert(#vim.fn.glob(plugin .. ".setup-*", false, true) == 0)
+    assert(#vim.fn.glob(data .. "/treesitter-backups/*", false, true) == 0)
+  end)
+  test("a Git tree that was not materialized is rejected safely", function()
+    existing(true)
+    missing_file = true
+    repair()
+    assert(exit_status == 1)
+    assert(vim.fn.filereadable(plugin .. "/marker") == 1)
+    assert(#vim.fn.glob(plugin .. ".setup-*", false, true) == 0)
+    assert(#vim.fn.glob(data .. "/treesitter-backups/*", false, true) == 0)
   end)
   test("failed download leaves the old installation untouched", function()
     existing(false)
@@ -118,6 +159,7 @@ local ok, err = xpcall(function()
   end)
 end, debug.traceback)
 vim.fn.system, vim.fn.stdpath, vim.cmd = original.system, original.stdpath, original.cmd
+for _, name in ipairs(git_variables) do vim.env[name] = environment[name] end
 vim.fn.delete(temporary, "rf")
 if not ok then
   io.stderr:write(err .. "\n")

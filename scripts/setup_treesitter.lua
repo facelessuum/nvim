@@ -8,8 +8,19 @@ local staging
 local function git(args)
   local command = { "git" }
   vim.list_extend(command, args)
-  local output = vim.fn.system(command)
-  return vim.v.shell_error == 0, vim.trim(output)
+  -- Dotfile/bare-repository shell setups can export these variables. They must
+  -- not redirect this clone/checkout into another repository or working tree.
+  local variables = { "GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES" }
+  local saved = {}
+  for _, name in ipairs(variables) do
+    saved[name] = vim.env[name]
+    vim.env[name] = nil
+  end
+  local ran, output = pcall(vim.fn.system, command)
+  local status = vim.v.shell_error
+  for _, name in ipairs(variables) do vim.env[name] = saved[name] end
+  if not ran then return false, tostring(output) end
+  return status == 0, vim.trim(output)
 end
 
 local function checked_git(args)
@@ -37,12 +48,23 @@ local ok, err = pcall(function()
   -- Prepare and verify the replacement before moving an existing installation.
   vim.fn.mkdir(vim.fn.fnamemodify(plugin, ":h"), "p")
   staging = plugin .. ".setup-" .. vim.fn.getpid() .. "-" .. tostring(vim.uv.hrtime())
-  print("Installing the legacy Treesitter revision from lazy-lock.json...")
+  print("Installing Treesitter lockfile revision " .. pinned.commit .. "...")
   checked_git({ "clone", "--filter=blob:none", "--no-checkout", "--branch", pinned.branch,
     "https://github.com/nvim-treesitter/nvim-treesitter.git", staging })
-  checked_git({ "-C", staging, "checkout", "--detach", pinned.commit })
-  assert(vim.fn.filereadable(staging .. "/lua/nvim-treesitter/configs.lua") == 1,
-    "The pinned Treesitter revision does not provide nvim-treesitter.configs")
+  local module = "lua/nvim-treesitter/configs.lua"
+  local has_blob, blob_err = git({ "-C", staging, "cat-file", "-e", pinned.commit .. ":" .. module })
+  if not has_blob then
+    error("Treesitter lockfile revision " .. pinned.commit .. " could not be verified as a legacy revision:\n"
+      .. blob_err .. "\nBack up lazy-lock.json, then restore the repository's tested lockfile with "
+      .. "git restore --source=HEAD -- lazy-lock.json and rerun setup.", 0)
+  end
+  -- Materialize the full tree even if global/template config enables sparse
+  -- checkout or redirects core.worktree. Do not alter the user's Git settings.
+  checked_git({ "-C", staging, "--work-tree=" .. staging, "-c", "core.sparseCheckout=false",
+    "checkout", "--detach", pinned.commit })
+  assert(vim.fn.filereadable(staging .. "/" .. module) == 1,
+    "Treesitter revision " .. pinned.commit .. " contains " .. module
+      .. " but Git did not materialize it at " .. staging .. ". Check Git checkout settings and permissions.")
 
   local backup
   if vim.uv.fs_lstat(plugin) then
@@ -70,6 +92,6 @@ end)
 
 if staging then vim.fn.delete(staging, "rf") end
 if not ok then
-  io.stderr:write("Treesitter setup failed: " .. tostring(err) .. "\nCheck Git/network access and rerun bash setup.sh.\n")
+  io.stderr:write("Treesitter setup failed: " .. tostring(err) .. "\nNo existing plugin was discarded. Resolve the error above and rerun bash setup.sh.\n")
   vim.cmd("cquit 1")
 end
