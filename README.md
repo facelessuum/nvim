@@ -114,6 +114,7 @@ Leader is **Space**; `jk` is a sequence. Plugin-local bindings take priority.
 | Ctrl+Z / Ctrl+Y | N, I | Undo / redo |
 | Ctrl+A | N, I | Select all lines |
 | Ctrl+R | N, I, V | Delete word under cursor |
+| Ctrl+G | V | Run selected lines (SnipRun; detects language from filetype) |
 | Shift+Tab | N, I, V | Unindent |
 | Alt+F | N, I, V | Format file or selection |
 | Alt+Q / Alt+E | N, I | Duplicate line below / above |
@@ -124,6 +125,25 @@ Leader is **Space**; `jk` is a sequence. Plugin-local bindings take priority.
 
 Ctrl+W replaces Vim’s window prefix: use `:split` or `:vsplit` to create splits.
 Copy/paste uses the system clipboard.
+
+To test code, select complete lines with `V`, then press **Ctrl+G**. SnipRun
+chooses an interpreter/compiler from the buffer's filetype and shows output in
+Neovim. The language must be supported and its runtime/compiler installed;
+selected code may need its own imports and variable definitions. This executes
+code, not just a preview, so only run snippets you trust. Use `:SnipClose` to
+clear the output.
+
+For Python, SnipRun defaults to `python3` on Neovim's PATH; it does not
+currently use this config's project-environment detection. With **uv**, launch
+Neovim from the project directory using `uv run nvim` so snippets can use the
+project's installed dependencies. Restart any existing Neovim session this way;
+you do not need to reinstall packages globally. For other virtual environments,
+activate the environment before launching Neovim.
+
+SnipRun's installer downloads a prebuilt binary on Linux (requires `curl`).
+On macOS it builds from source, requiring the Rust toolchain (`cargo`). If the
+binary does not run on your Linux architecture, build it from source by running
+`sh install.sh 1` in SnipRun's plugin directory (shown in `:Lazy`).
 
 ### Telescope
 
