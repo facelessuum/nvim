@@ -39,7 +39,13 @@ nvim
   to avoid an unsupported partial upgrade. Review that before running setup.
 - Neovim **0.11.x is the tested version**. 0.12+ is untested with the legacy
   Treesitter `master` branch; use 0.11.x if you encounter parser incompatibilities.
-- On first interactive launch, plugins, Treesitter parsers, and language
+- Setup restores Treesitter to the legacy `master` revision in `lazy-lock.json`
+  without loading your config. This fixes `nvim-treesitter.configs` missing on
+  machines with the newer plugin API. A matching installation is left alone;
+  replaced checkouts are preserved under Neovim's data directory in
+  `treesitter-backups/`, outside Lazy's cleanup directory. Close Neovim before
+  rerunning setup. Git and internet access are needed for a replacement.
+- On first interactive launch, other plugins, Treesitter parsers, and language
   servers/formatters (via Mason) install automatically. Internet access is needed
   for installation, but installed plugins work offline. Missing runtimes are
   reported instead of failing; servers that are not installed are skipped.
@@ -82,13 +88,16 @@ ripgrep, a current Node.js/npm, and Python with venv yourself; place the checkou
 in Neovim's `stdpath('config')` directory (normally `%LOCALAPPDATA%\nvim`).
 The shell installer and Bash aliases are not native Windows tools.
 
-If a Treesitter install fails (for example `mv: cannot stat tree-sitter-lua-tmp/...`),
-run `:Lazy restore`, then `:TSUpdate`.
+If `nvim-treesitter.configs` is missing, close Neovim and run `bash setup.sh`
+again, then reopen Neovim. For parser installation failures (for example
+`mv: cannot stat tree-sitter-lua-tmp/...`), run `:Lazy restore`, restart Neovim,
+then run `:TSUpdate`.
 
 ### Offline regression checks
 
 ```bash
 nvim --headless -u NONE -l tests/portability.lua
+nvim --headless -u NONE -l tests/treesitter_setup.lua
 bash tests/setup.sh
 bash -n setup.sh alias/load.sh alias/setup_alias_loader.sh
 ```

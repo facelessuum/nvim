@@ -182,7 +182,15 @@ if [[ "$(cd -- "$CONFIG" 2>/dev/null && pwd -P)" != "$ROOT" ]]; then
   fi
 fi
 
+# Use -u NONE so a broken plugin config cannot prevent the repair. The script
+# resolves stdpath('data') itself, respecting XDG_DATA_HOME and NVIM_APPNAME.
+if command -v git >/dev/null; then
+  GIT_TERMINAL_PROMPT=0 nvim --headless -u NONE -l "$ROOT/scripts/setup_treesitter.lua"
+else
+  echo 'Treesitter repair skipped: install Git, then rerun setup.' >&2
+fi
+
 echo
-echo 'Done. Run nvim: plugins, parsers, and Mason tools install on first interactive launch.'
+echo 'Done. Run nvim: remaining plugins, parsers, and Mason tools install on first interactive launch.'
 echo 'Use :checkhealth config for machine-specific dependency checks.'
 if $INSTALL_ALIASES; then echo 'Aliases are Bash-only: open a Bash terminal or run source ~/.bashrc.'; fi

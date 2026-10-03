@@ -18,6 +18,8 @@ cat > "$TMP/bin/nvim" <<'SH'
 #!/bin/sh
 if [ "$1" = --version ]; then
   printf 'NVIM v%s\nBuild type: Release\n' "$NVIM_TEST_VERSION"
+elif [ "$1" = --headless ] && [ "$2" = -u ] && [ "$3" = NONE ] && [ "$4" = -l ] && [ "$GIT_TERMINAL_PROMPT" = 0 ]; then
+  printf '%s\n' "$5" > "$TEST_REPAIR"
 else
   exit 99
 fi
@@ -72,8 +74,8 @@ check_version 0.11.4-dev 0
 [[ ! -e "$TEST_FORBIDDEN" && ! -e "$HOME/.bashrc" ]] || { echo '--check had forbidden side effects' >&2; exit 1; }
 printf 'Passed %s version checks; no side effects.\n' "$count"
 
-# Normal setup must never prompt for credentials. Mock sudo refuses any
-# invocation without -n, so no password prompt can sneak into these tests.
+# Normal setup must run the repair without loading init.lua. Mock sudo refuses
+# any invocation without -n, so no password prompt can sneak into these tests.
 "$RM_BIN" "$TMP/bin/sudo" "$TMP/bin/apt-get"
 "$CAT_BIN" > "$TMP/bin/sudo" <<'SH'
 #!/bin/sh
@@ -92,7 +94,7 @@ printf '%s\n' "$*" >> "$TEST_PACKAGES_LOG"
 SH
 "$CHMOD_BIN" +x "$TMP/bin/sudo" "$TMP/bin/apt-get"
 export NVIM_TEST_VERSION=0.11.4 NVIM_TEST_OS=Linux
-export TEST_SUDO_LOG="$TMP/sudo-log" TEST_PACKAGES_LOG="$TMP/packages-log"
+export TEST_REPAIR="$TMP/repair" TEST_SUDO_LOG="$TMP/sudo-log" TEST_PACKAGES_LOG="$TMP/packages-log"
 # Supply true to the mocked sudo probe without expanding the host PATH.
 "$CAT_BIN" > "$TMP/bin/true" <<'SH'
 #!/bin/sh
@@ -101,14 +103,15 @@ SH
 "$CHMOD_BIN" +x "$TMP/bin/true"
 
 check_setup() {
-  "$RM_BIN" -f "$TEST_SUDO_LOG" "$TEST_PACKAGES_LOG"
+  "$RM_BIN" -f "$TEST_REPAIR" "$TEST_SUDO_LOG" "$TEST_PACKAGES_LOG"
   "$BASH_BIN" "$ROOT/setup.sh" --no-aliases > "$TMP/output" 2>&1
+  [[ $(<"$TEST_REPAIR") == "$ROOT/scripts/setup_treesitter.lua" ]] || { echo 'Treesitter repair not invoked' >&2; exit 1; }
   [[ ! -e "$TEST_FORBIDDEN" && ! -e "$HOME/.bashrc" ]] || { echo 'setup had forbidden side effects' >&2; exit 1; }
   count=$((count + 1))
 }
 check_setup
 [[ ! -e "$TEST_PACKAGES_LOG" ]] || { echo 'Unnecessary package install' >&2; exit 1; }
-printf 'ok %s - available prerequisites skip package installation\n' "$count"
+printf 'ok %s - available prerequisites skip package installation and run repair\n' "$count"
 
 if [[ $EUID -ne 0 ]]; then
   "$RM_BIN" "$TMP/bin/make"
@@ -143,6 +146,8 @@ cat > "$4/nvim-linux-x86_64/bin/nvim" <<'NVIM'
 #!/bin/sh
 if [ "$1" = --version ]; then
   printf 'NVIM v0.11.4\n'
+elif [ "$1" = --headless ] && [ "$2" = -u ] && [ "$3" = NONE ] && [ "$4" = -l ] && [ "$GIT_TERMINAL_PROMPT" = 0 ]; then
+  printf '%s\n' "$5" > "$TEST_REPAIR"
 else
   exit 99
 fi
@@ -156,7 +161,7 @@ SH
   check_setup
   [[ -L "$HOME/.local/bin/nvim" && -x "$HOME/.local/opt/nvim-linux-x86_64/bin/nvim" ]] || { echo 'User-local Neovim not installed' >&2; exit 1; }
   [[ $(<"$TEST_SUDO_LOG") == '-n true' && ! -e "$TEST_PACKAGES_LOG" ]] || { echo 'User-local install used sudo' >&2; exit 1; }
-  printf 'ok %s - Neovim installs under HOME without root\n' "$count"
+  printf 'ok %s - Neovim installs under HOME and runs repair without root\n' "$count"
 else
   echo 'Skipping sudo fallback cases when tests run as root.'
 fi
