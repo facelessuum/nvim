@@ -57,6 +57,17 @@ require("lazy").setup({
     end,
   },
 
+  -- Run highlighted lines using the current buffer's language.
+  {
+    "michaelb/sniprun",
+    build = "sh install.sh",
+    opts = {},
+    cmd = { "SnipRun", "SnipInfo", "SnipClose", "SnipReset" },
+    keys = {
+      { "<C-g>", ":SnipRun<CR>", mode = "x", silent = true, desc = "Run selected code" },
+    },
+  },
+
   -- Select and edit matching words with multiple cursors.
   {
     "mg979/vim-visual-multi",
