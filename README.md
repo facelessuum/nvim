@@ -16,16 +16,21 @@ nvim
 ```
 
 - Install Git first (`sudo apt install git` on Ubuntu/Debian).
-- Run setup as your normal user. It uses sudo if available; without sudo it
-  installs Neovim **0.11.4** into `~/.local`. Supports Linux x86_64/ARM64
-  (apt, dnf, pacman, zypper, apk) and macOS (Homebrew).
-- Setup installs the prerequisites: Git, curl, tar, unzip, make, a C compiler,
-  ripgrep, jq, Node.js/npm, and Python with venv. Use a **current Node LTS**;
+- Run setup as your normal user. **It never prompts for a sudo password.** On
+  Linux it uses `sudo -n` only if authorization is already available; otherwise
+  it installs Neovim **0.11.4** into `~/.local` and skips system packages.
+  Supports Linux x86_64/ARM64 (apt, dnf, pacman, zypper, apk) and macOS (Homebrew).
+- When prerequisites are missing and root/passwordless sudo (or Homebrew) is
+  available, setup installs Git, curl, tar, unzip, make, a C compiler, ripgrep,
+  jq, Node.js/npm, and Python with venv. Otherwise it lists missing tools; those
+  system dependencies need to be provided separately. Available prerequisites
+  are reused without running a package manager. Use a **current Node LTS**;
   older distro Node packages may not run the latest Mason language servers.
-  Linux desktop clipboard helpers (`wl-clipboard`/`xclip`) are also installed.
+  Linux desktop clipboard helpers (`wl-clipboard`/`xclip`) are installed along
+  with system packages when possible.
 - It skips Neovim if you already have 0.11.4+, and links the checkout to
   `${XDG_CONFIG_HOME:-$HOME/.config}/${NVIM_APPNAME:-nvim}` if cloned elsewhere.
-  Existing configurations are never overwritten. Without sudo, add
+  Existing configurations are never overwritten. For a user-local install, add
   `export PATH="$HOME/.local/bin:$PATH"` to your shell rc file after installation.
 - On macOS, install Homebrew and Apple Command Line Tools (`xcode-select --install`)
   first. On Alpine/musl, setup uses the distro Neovim package; the upstream Linux

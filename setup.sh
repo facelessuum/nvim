@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install prerequisites on Linux/macOS. Run as your normal user.
+# Install prerequisites on Linux/macOS without password prompts. Run as your normal user.
 set -euo pipefail
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -69,7 +69,8 @@ esac
 
 SUDO=()
 if [[ $OS == Linux && $EUID -ne 0 ]]; then
-  if command -v sudo >/dev/null && sudo -v 2>/dev/null; then SUDO=(sudo); else SUDO=(none); fi
+  # Never prompt for credentials, including if authorization expires mid-setup.
+  if command -v sudo >/dev/null && sudo -n true 2>/dev/null; then SUDO=(sudo -n); else SUDO=(none); fi
 fi
 can_root() { [[ ${SUDO[0]:-} != none ]]; }
 as_root() { if [[ ${#SUDO[@]} -eq 0 ]]; then "$@"; else "${SUDO[@]}" "$@"; fi; }
@@ -82,7 +83,7 @@ install_packages() {
     brew install git curl ripgrep jq unzip node python neovim
     if ! version_ok; then brew upgrade neovim; fi
   elif ! can_root; then
-    echo 'No sudo: skipping system packages; missing dependencies will be listed below.' >&2
+    echo 'No passwordless sudo: skipping system packages; missing dependencies will be listed below.' >&2
   elif command -v apt-get >/dev/null; then
     as_root apt-get update
     as_root apt-get install -y curl ca-certificates tar gzip unzip git build-essential ripgrep jq \
@@ -151,7 +152,11 @@ install_neovim_linux() {
   fi
 }
 
-install_packages
+if check_tools >/dev/null 2>&1 && { [[ $OS != Darwin ]] || version_ok; }; then
+  echo 'Prerequisites are already available; skipping system packages.'
+else
+  install_packages
+fi
 if version_ok; then
   echo 'A compatible Neovim is already installed.'
 elif [[ $OS == Linux ]]; then
