@@ -45,6 +45,10 @@ nvim
   replaced checkouts are preserved under Neovim's data directory in
   `treesitter-backups/`, outside Lazy's cleanup directory. Close Neovim before
   rerunning setup. Git and internet access are needed for a replacement.
+  The runtime config also detects both APIs: a newer checkout uses its own API
+  on Neovim 0.12+, while an incompatible or missing checkout produces a recovery
+  warning instead of this missing-module startup error. The pinned legacy
+  version remains the tested/default configuration.
 - On first interactive launch, other plugins, Treesitter parsers, and language
   servers/formatters (via Mason) install automatically. Internet access is needed
   for installation, but installed plugins work offline. Missing runtimes are
