@@ -31,8 +31,13 @@ Install the language servers and formatters you use with `:Mason`. For example:
 ```
 
 Parsers and Mason tools are installed manually per machine. Run `:TSUpdate` to
-update parsers and `:ConformInfo` to inspect formatter availability. Activate
-Python virtual environments before launching Neovim; Go/Rust and other optional
+update parsers and `:ConformInfo` to inspect formatter availability. Pyright
+selects the nearest project `.venv` or `venv` automatically, including shared
+monorepo environments, then falls back to `VIRTUAL_ENV`, `CONDA_PREFIX`, or
+Python on PATH. After `uv sync`, restart Neovim if the environment was created
+while the server was running. Use `:LspPyrightSetPythonPath /path/to/python` for
+a manual override. Error Lens-style messages display LSP diagnostics; they do
+not install or resolve dependencies themselves. Go/Rust and other optional
 languages need their corresponding servers, formatters, and toolchains.
 
 The optional Bash aliases in `alias/` are separate from Neovim and are not loaded
