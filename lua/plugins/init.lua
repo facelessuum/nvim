@@ -1,7 +1,7 @@
 -- Lazy.nvim setup
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
-  local output = vim.fn.system({
+  vim.fn.system({
     "git",
     "clone",
     "--filter=blob:none",
@@ -9,19 +9,12 @@ if not vim.uv.fs_stat(lazypath) then
     "--branch=stable",
     lazypath,
   })
-  if vim.v.shell_error ~= 0 then
-    vim.api.nvim_echo({ { "Failed to clone lazy.nvim (is git installed?):\n" .. output, "ErrorMsg" } }, true, {})
-    return
-  end
 end
 
 vim.opt.rtp:prepend(lazypath)
 
 -- Plugin list
 require("lazy").setup({
-  -- Plugin manager
-  "folke/lazy.nvim",
-
   -- Colorscheme
   {
     "catppuccin/nvim",
@@ -45,9 +38,7 @@ require("lazy").setup({
   -- Formatting tools and file formatting.
   {
     "mason-org/mason.nvim",
-    config = function()
-      require("plugins.mason")
-    end,
+    opts = {},
   },
   {
     "stevearc/conform.nvim",
@@ -93,10 +84,6 @@ require("lazy").setup({
       "nvim-lua/plenary.nvim",
       {
         "nvim-telescope/telescope-fzf-native.nvim",
-        -- Native sorting is optional; the Lua sorter works without build tools.
-        cond = function()
-          return vim.fn.executable("make") == 1 and #require("core.platform").compilers() > 0
-        end,
         build = "make",
       },
     },
@@ -142,9 +129,4 @@ require("lazy").setup({
   end,
   },
 
-}, {
-  -- Use this checkout's lockfile even when stdpath('config') points elsewhere.
-  lockfile = vim.g.config_dir .. "/lazy-lock.json",
-  -- Keep the checkout added by init.lua when stdpath('config') points elsewhere.
-  performance = { rtp = { reset = false } },
 })

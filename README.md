@@ -6,121 +6,37 @@ I got bored, configured Neovim until I forgot what I was supposed to be doing, a
 
 ## Installation
 
-Back up your existing Neovim configuration first, then run:
+Install Neovim **0.11.4+**, Git, a C compiler, make, curl, tar, and ripgrep yourself.
+Language servers and formatters may also need Node.js/npm, Python, or their
+language's toolchain. Use a Nerd Font for icons and a desktop clipboard provider
+such as `wl-clipboard` or `xclip` on Linux.
+
+Back up your existing configuration, then clone into Neovim's config directory:
 
 ```bash
 git clone https://github.com/facelessuum/nvim.git "${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
-cd "${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
-bash setup.sh
 nvim
 ```
 
-- Install Git first (`sudo apt install git` on Ubuntu/Debian).
-- Run setup as your normal user. **It never prompts for a sudo password.** On
-  Linux it uses `sudo -n` only if authorization is already available; otherwise
-  it installs Neovim **0.11.4** into `~/.local` and skips system packages.
-  Supports Linux x86_64/ARM64 (apt, dnf, pacman, zypper, apk) and macOS (Homebrew).
-- When prerequisites are missing and root/passwordless sudo (or Homebrew) is
-  available, setup installs Git, curl, tar, unzip, make, a C compiler, ripgrep,
-  jq, Node.js/npm, and Python with venv. Otherwise it lists missing tools; those
-  system dependencies need to be provided separately. Available prerequisites
-  are reused without running a package manager. Use a **current Node LTS**;
-  older distro Node packages may not run the latest Mason language servers.
-  Linux desktop clipboard helpers (`wl-clipboard`/`xclip`) are installed along
-  with system packages when possible.
-- It skips Neovim if you already have 0.11.4+, and links the checkout to
-  `${XDG_CONFIG_HOME:-$HOME/.config}/${NVIM_APPNAME:-nvim}` if cloned elsewhere.
-  Existing configurations are never overwritten. For a user-local install, add
-  `export PATH="$HOME/.local/bin:$PATH"` to your shell rc file after installation.
-- On macOS, install Homebrew and Apple Command Line Tools (`xcode-select --install`)
-  first. On Alpine/musl, setup uses the distro Neovim package; the upstream Linux
-  tarball is glibc-only. The distro package must still meet the minimum version.
-- On Arch, prerequisite installation uses `pacman -Syu` (a full system upgrade)
-  to avoid an unsupported partial upgrade. Review that before running setup.
-- Neovim **0.11.x is the tested version**. 0.12+ is untested with the legacy
-  Treesitter `master` branch; use 0.11.x if you encounter parser incompatibilities.
-- Setup restores Treesitter to the legacy `master` revision in `lazy-lock.json`
-  without loading your config. This fixes `nvim-treesitter.configs` missing on
-  machines with the newer plugin API. A matching installation is left alone;
-  replaced checkouts are preserved under Neovim's data directory in
-  `treesitter-backups/`, outside Lazy's cleanup directory. Close Neovim before
-  rerunning setup. Git and internet access are needed for a replacement.
-  Setup isolates inherited Git repository variables and disables sparse checkout
-  for the replacement without changing your global Git settings.
-  The runtime config also detects both APIs: a newer checkout uses its own API
-  on Neovim 0.12+, while an incompatible or missing checkout produces a recovery
-  warning instead of this missing-module startup error. The pinned legacy
-  version remains the tested/default configuration.
-- On first interactive launch, other plugins, Treesitter parsers, and language
-  servers/formatters (via Mason) install automatically. Internet access is needed
-  for installation, but installed plugins work offline. Missing runtimes are
-  reported instead of failing; servers that are not installed are skipped.
-  Parser/Mason auto-install does not run during headless checks. Press `q` to close Lazy.
-- No compiler/make? Treesitter skips parser installation and Telescope uses its
-  Lua sorter. Completion also falls back to Lua if a native matcher is unavailable.
-- Shared aliases live in `alias/aliases.json`. Put machine-specific ones (project
-  paths, SSH hosts) in `alias/aliases.local.json`, which Git ignores; see
-  `alias/aliases.local.example.json`. Aliases are **Bash-only**; run
-  `source ~/.bashrc` to load them. Desktop-opening aliases use Linux/macOS/WSL
-  openers automatically. Use `bash setup.sh --no-aliases` if you use another shell.
-- Use a Nerd Font for icons. Clipboard uses `wl-clipboard`/`xclip`/`xsel` on a
-  desktop (macOS uses `pbcopy`/`pbpaste`); over SSH or without a usable desktop
-  clipboard it copies through the terminal (OSC 52). OSC 52 requires terminal
-  support, and paste returns the last copy made inside Neovim—not your desktop clipboard.
+Lazy installs the plugins on first launch. There is no setup script, system
+package installer, or shell configuration modification. For an existing install,
+run `:Lazy sync` and restart Neovim. Treesitter stays on its legacy `master`
+branch to match this configuration.
 
-### Moving to another computer
+Install the language servers and formatters you use with `:Mason`. For example:
 
-Clone this repository and run setup on **each** computer. Keep `lazy-lock.json`
-with the checkout so fresh plugin installs use the same revisions. Do **not**
-copy `~/.local/share/nvim` between operating systems or CPU architectures: native
-sorters, parsers, completion binaries, and Mason tools must be installed locally.
-Project virtual environments are detected automatically; do not commit their paths.
-
-Check prerequisites without installing or changing anything:
-
-```bash
-bash setup.sh --check
+```vim
+:MasonInstall lua-language-server pyright typescript-language-server json-lsp prettier stylua ruff
+:TSInstall lua vim vimdoc query javascript typescript python bash json html css
 ```
 
-Inside Neovim, run `:checkhealth config` for this config's dependency checks,
-`:Mason` for optional tools (gopls, rust-analyzer, clangd, …), and `:ConformInfo`
-for formatter status. Install Go/Rust toolchains for `gofmt`/`rustfmt`, and the
-appropriate runtimes for optional Java/PHP/Ruby tools. After `git pull`, run
-`:Lazy restore` to match `lazy-lock.json`; `:Lazy update` deliberately changes versions.
-Mason packages are installed per machine and are not pinned by Lazy's lockfile.
+Parsers and Mason tools are installed manually per machine. Run `:TSUpdate` to
+update parsers and `:ConformInfo` to inspect formatter availability. Activate
+Python virtual environments before launching Neovim; Go/Rust and other optional
+languages need their corresponding servers, formatters, and toolchains.
 
-`setup.sh` targets Linux and macOS. On native Windows, install Neovim 0.11.4+, Git,
-ripgrep, a current Node.js/npm, and Python with venv yourself; place the checkout
-in Neovim's `stdpath('config')` directory (normally `%LOCALAPPDATA%\nvim`).
-The shell installer and Bash aliases are not native Windows tools.
-
-If `nvim-treesitter.configs` is missing, close Neovim and run `bash setup.sh`
-again, then reopen Neovim. For parser installation failures (for example
-`mv: cannot stat tree-sitter-lua-tmp/...`), run `:Lazy restore`, restart Neovim,
-then run `:TSUpdate`.
-
-If setup cannot verify the lockfile revision as a legacy Treesitter revision,
-check `git diff -- lazy-lock.json`: a local Lazy update may have changed the
-commit without changing the branch label. Setup prints the selected SHA and
-Git's error instead of assuming this is a network failure. To restore the
-repository's tested plugin versions (this resets local lockfile updates), back
-up the lockfile first:
-
-```bash
-cp lazy-lock.json "$HOME/nvim-lazy-lock.backup-$(date +%s).json"
-git restore --source=HEAD -- lazy-lock.json
-bash setup.sh
-```
-
-### Offline regression checks
-
-```bash
-nvim --headless -u NONE -l tests/portability.lua
-nvim --headless -u NONE -l tests/treesitter_setup.lua
-bash tests/treesitter_checkout.sh
-bash tests/setup.sh
-bash -n setup.sh alias/load.sh alias/setup_alias_loader.sh
-```
+The optional Bash aliases in `alias/` are separate from Neovim and are not loaded
+by this configuration.
 
 ## Keybindings
 
@@ -167,8 +83,7 @@ selected code may need its own imports and variable definitions. This executes
 code, not just a preview, so only run snippets you trust. Use `:SnipClose` to
 clear the output.
 
-For Python, SnipRun defaults to `python3` on Neovim's PATH; it does not
-currently use this config's project-environment detection. With **uv**, launch
+For Python, SnipRun defaults to `python3` on Neovim's PATH. With **uv**, launch
 Neovim from the project directory using `uv run nvim` so snippets can use the
 project's installed dependencies. Restart any existing Neovim session this way;
 you do not need to reinstall packages globally. For other virtual environments,
@@ -192,10 +107,8 @@ binary does not run on your Linux architecture, build it from source by running
 | Esc | Leave Insert mode; press again to close |
 | Ctrl+/ (Insert) / `?` (Normal) | Show picker bindings |
 
-File search includes dotfiles and respects `.gitignore`. With ripgrep and a POSIX
-shell plus `sort`, it also makes exceptions for ignored `.env`, `.env.*`, and `.envrc` files.
-Without a POSIX shell it runs ripgrep directly; without ripgrep it falls back to
-Telescope's fd/find search.
+File search includes dotfiles and uses Telescope's standard file-finding behavior,
+including `.gitignore` rules when using ripgrep.
 
 ### Completion
 

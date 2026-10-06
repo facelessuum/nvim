@@ -24,30 +24,10 @@ local function open_file(command)
   end
 end
 
--- Combine ignored dotenv exceptions where a POSIX shell is available. On
--- native Windows/minimal systems, invoke rg directly rather than a missing sh.
-local find_command
-if vim.fn.executable("rg") == 1 then
-  find_command = { "rg", "--files", "--hidden", "--color", "never", "--no-require-git", "--glob", "!.git" }
-  if vim.fn.executable("sh") == 1 and vim.fn.executable("sort") == 1 then
-    find_command = {
-      "sh", "-c", [[
-        {
-          rg --files --hidden --color never --no-require-git --glob '!.git'
-          rg --files --hidden --color never --no-require-git --glob '.env' --glob '.env.*' --glob '.envrc' --glob '!.git'
-        } | sort -u
-      ]],
-    }
-  end
-end
-
 require("telescope").setup({
   pickers = {
     find_files = {
-      -- Honor .gitignore even in folders without a Git repository.
       hidden = true,
-      -- Without ripgrep, let Telescope fall back to fd/find.
-      find_command = find_command,
     },
   },
   extensions = {
@@ -59,12 +39,6 @@ require("telescope").setup({
     },
   },
   defaults = {
-    -- Bound preview work when scrolling across large/minified files.
-    preview = {
-      filesize_limit = 0.5,
-      highlight_limit = 0.1,
-      treesitter = false,
-    },
     mappings = {
       i = {
         ["<C-w>"] = require("telescope.actions").close,
@@ -95,8 +69,7 @@ require("telescope").setup({
   }
 })
 
--- The native sorter is compiled with make; fall back to the Lua sorter if the build failed.
-pcall(require("telescope").load_extension, "fzf")
+require("telescope").load_extension("fzf")
 
 vim.keymap.set({ "n", "i" }, "<C-e>", "<cmd>Telescope find_files<CR>", {
   desc = "Find files",
