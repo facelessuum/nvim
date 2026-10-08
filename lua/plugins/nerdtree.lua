@@ -61,6 +61,19 @@ require("nvim-tree").setup ({
       })
     end
 
+    vim.keymap.set("n", "<C-s>", function()
+      -- Put the new file to the right of the editor, before the right-side tree.
+      local splitright = vim.o.splitright
+      vim.o.splitright = true
+      local ok, err = pcall(api.node.open.vertical_no_picker, nil, { focus = true })
+      vim.o.splitright = splitright
+      if not ok then vim.notify(tostring(err), vim.log.levels.ERROR) end
+    end, {
+      buffer = bufnr,
+      silent = true,
+      desc = "Open file in right vertical split; stay in tree",
+    })
+
     vim.keymap.set("n", "o", function()
       local node = api.tree.get_node_under_cursor()
       if not node or not node.absolute_path then return end

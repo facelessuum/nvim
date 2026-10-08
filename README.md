@@ -161,6 +161,7 @@ Deleting a session stops its job. Ctrl+C in shell input mode interrupts commands
 | `n` | Create file with extension, otherwise folder; trailing `/` forces folder |
 | `a` | Standard create prompt (use for extensionless files) |
 | Enter / `s` / double-click | Open file or toggle folder; stay in tree |
+| Ctrl+S | Open selected file in a right vertical split; stay in tree |
 | `i` | Return to editor in Insert mode |
 | `o` | Open containing folder in system file manager |
 | `r` / `d` | Rename / delete |
