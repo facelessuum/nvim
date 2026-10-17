@@ -37,8 +37,14 @@ monorepo environments, then falls back to `VIRTUAL_ENV`, `CONDA_PREFIX`, or
 Python on PATH. After `uv sync`, restart Neovim if the environment was created
 while the server was running. Use `:LspPyrightSetPythonPath /path/to/python` for
 a manual override. Error Lens-style messages display LSP diagnostics; they do
-not install or resolve dependencies themselves. Go/Rust and other optional
-languages need their corresponding servers, formatters, and toolchains.
+not install or resolve dependencies themselves. Diagnostics update while typing,
+and LSP file watching is enabled so creating, editing, or deleting imported
+modules on disk also triggers an update. Neovim 0.11's fallback watcher has a
+compatibility fix for newly created files being mislabeled as edits. You do not
+need to close tabs or restart Neovim for ordinary code/import fixes. If a server
+gets stuck, use `:LspRestart` to restart it without closing your tabs. Go/Rust and
+other optional languages need their corresponding servers, formatters, and
+toolchains.
 
 The optional Bash aliases in `alias/` are separate from Neovim and are not loaded
 by this configuration.

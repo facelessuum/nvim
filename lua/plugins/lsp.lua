@@ -1,5 +1,13 @@
+require("core.lsp_watchfiles").setup()
+
 vim.lsp.config("*", {
-  capabilities = require("blink.cmp").get_lsp_capabilities(),
+  capabilities = require("blink.cmp").get_lsp_capabilities({
+    workspace = {
+      -- Neovim 0.11 disables this by default on Linux. Without file watchers,
+      -- imports can stay unresolved after modules/dependencies change on disk.
+      didChangeWatchedFiles = { dynamicRegistration = true },
+    },
+  }),
 })
 
 vim.lsp.config("lua_ls", {
