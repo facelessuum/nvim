@@ -21,7 +21,9 @@ nvim
 Lazy installs the plugins on first launch. There is no setup script, system
 package installer, or shell configuration modification. For an existing install,
 run `:Lazy sync` and restart Neovim. Treesitter stays on its legacy `master`
-branch to match this configuration.
+branch for Neovim 0.11 compatibility. Highlighting uses Neovim's built-in
+Treesitter API rather than the removed `nvim-treesitter.configs` module;
+filetypes without an installed parser keep normal syntax highlighting.
 
 Install the language servers and formatters you use with `:Mason`. For example:
 
