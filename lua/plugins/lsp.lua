@@ -19,8 +19,8 @@ vim.lsp.config("lua_ls", {
   },
 })
 
--- uv sync installs into .venv without activating it in Neovim's shell.
--- Select the project's interpreter before Pyright starts resolving imports.
+-- Honor shell activation, or discover a project .venv (for example after uv sync).
+-- Select the interpreter before Pyright starts resolving imports.
 vim.lsp.config("pyright", {
   before_init = function(_, config)
     local python = config.settings.python

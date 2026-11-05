@@ -22,14 +22,30 @@ local ok, err = xpcall(function()
   vim.env.CONDA_PREFIX = root .. "/conda"
   local activated = interpreter(vim.env.VIRTUAL_ENV)
   local conda = interpreter(vim.env.CONDA_PREFIX)
-  assert(environment.find(member) == activated, "activated environment fallback")
+  assert(environment.find(member) == activated, "virtual environment wins over Conda")
 
   local shared = interpreter(project .. "/.venv")
-  assert(environment.find(member) == shared, "shared monorepo environment wins over activated environment")
   local nearest = interpreter(member .. "/venv")
-  assert(environment.find(member) == nearest, "nearest environment wins")
   local uv = interpreter(member .. "/.venv")
-  assert(environment.find(member) == uv, "uv .venv wins over venv")
+  assert(environment.find(member) == activated, "activated virtual environment wins over project environments")
+  vim.env.VIRTUAL_ENV = nil
+  assert(environment.find(member) == conda, "activated Conda environment wins over project environments")
+  vim.env.CONDA_PREFIX = root .. "/another-conda"
+  local another_conda = interpreter(vim.env.CONDA_PREFIX)
+  assert(environment.find(member) == another_conda, "environment selection is not cached")
+  vim.env.VIRTUAL_ENV = root .. "/missing"
+  assert(environment.find(member) == another_conda, "invalid virtual environment falls back to Conda")
+  vim.env.CONDA_PREFIX = root .. "/also-missing"
+  assert(environment.find(member) == uv, "invalid activated environments fall back to project environment")
+  vim.env.VIRTUAL_ENV = ""
+  vim.env.CONDA_PREFIX = ""
+  assert(environment.find(member) == uv, "empty environment variables are ignored; .venv wins over venv")
+  vim.fn.delete(member .. "/.venv", "rf")
+  assert(environment.find(member) == nearest, "nearest environment wins without an activated environment")
+  vim.fn.delete(member .. "/venv", "rf")
+  assert(environment.find(member) == shared, "shared monorepo environment fallback")
+  vim.env.VIRTUAL_ENV = root .. "/activated"
+  vim.env.CONDA_PREFIX = root .. "/conda"
 
   vim.fn.delete(member .. "/.venv", "rf")
   vim.fn.delete(member .. "/venv", "rf")

@@ -34,11 +34,13 @@ Install the language servers and formatters you use with `:Mason`. For example:
 
 Parsers and Mason tools are installed manually per machine. Run `:TSUpdate` to
 update parsers and `:ConformInfo` to inspect formatter availability. Pyright
-selects the nearest project `.venv` or `venv` automatically, including shared
-monorepo environments, then falls back to `VIRTUAL_ENV`, `CONDA_PREFIX`, or
-Python on PATH. After `uv sync`, restart Neovim if the environment was created
-while the server was running. Use `:LspPyrightSetPythonPath /path/to/python` for
-a manual override. Error Lens-style messages display LSP diagnostics; they do
+prefers an activated `VIRTUAL_ENV` or `CONDA_PREFIX`, then selects the nearest
+project `.venv` or `venv`, including shared monorepo environments, and finally
+falls back to Python on PATH. Activate the desired environment before launching
+Neovim; no interpreter paths need to be hardcoded. An environment activated in
+Neovim's embedded terminal cannot change the parent editor's environment. After
+`uv sync`, restart Neovim if the environment was created while the server was
+running. Use `:LspPyrightSetPythonPath /path/to/python` for a manual override. Error Lens-style messages display LSP diagnostics; they do
 not install or resolve dependencies themselves. Diagnostics update while typing,
 and LSP file watching is enabled so creating, editing, or deleting imported
 modules on disk also triggers an update. Neovim 0.11's fallback watcher has a

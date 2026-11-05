@@ -1,9 +1,16 @@
--- Select the nearest environment, including shared monorepo environments.
+-- Prefer activated environments, then the nearest project or shared monorepo environment.
 local M = {}
 
 function M.find(root)
   root = root or vim.fn.getcwd()
   local environments = {}
+  -- Explicit shell activation takes priority over an existing project .venv.
+  for _, variable in ipairs({ "VIRTUAL_ENV", "CONDA_PREFIX" }) do
+    local environment = vim.env[variable]
+    if environment and environment ~= "" then
+      table.insert(environments, environment)
+    end
+  end
   -- Workspace members can share a virtual environment at the monorepo root.
   local directory = root
   while directory do
@@ -13,12 +20,6 @@ function M.find(root)
     local parent = vim.fs.dirname(directory)
     if parent == directory then break end
     directory = parent
-  end
-  for _, variable in ipairs({ "VIRTUAL_ENV", "CONDA_PREFIX" }) do
-    local environment = vim.env[variable]
-    if environment and environment ~= "" then
-      table.insert(environments, environment)
-    end
   end
   for _, environment in ipairs(environments) do
     for _, suffix in ipairs({ "/bin/python", "/Scripts/python.exe", "/python.exe" }) do
