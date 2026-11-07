@@ -50,8 +50,23 @@ gets stuck, use `:LspRestart` to restart it without closing your tabs. Go/Rust a
 other optional languages need their corresponding servers, formatters, and
 toolchains.
 
-The optional Bash aliases in `alias/` are separate from Neovim and are not loaded
-by this configuration.
+The optional Linux/Bash aliases and their setup are all in `alias/setup.sh`,
+separate from Neovim. Run it from this checkout:
+
+```bash
+./alias/setup.sh
+```
+
+It automatically registers itself in `~/.bashrc`, replacing the old loader,
+and opens an interactive Bash shell with the aliases loaded. To set up or reload
+them in your **current** shell instead, run `source alias/setup.sh`. Future Bash
+terminals load them automatically. No separate installer or `jq` is needed.
+`ai-ie` changes the current shell's directory to `/home/umm/projects/ie-ai-2`, opens a
+separate GNOME Terminal window with three fresh Pi sessions named `review-commit`,
+`ideas`, and `worker`, then opens Neovim in the current terminal without waiting
+for those Pi sessions to finish. `ai-prac` does the same for
+`/home/umm/projects/ai-practice-py`, and `ai-floor` does the same for
+`/home/umm/projects/aiFloor`, using the same three session names.
 
 ## Keybindings
 
