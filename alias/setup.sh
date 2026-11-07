@@ -109,7 +109,7 @@ alias ai-floor='cd /home/umm/projects/aiFloor && gnome-terminal \
         gnome-terminal --tab --working-directory=/home/umm/projects/aiFloor --title=worker \\
             -- bash -ic \"pi-resume-named worker\"
         pi-resume-named review-commit
-    " && conda activate ai-floor && nvim'
+    " && conda activate aifloor && nvim'
 
 # Register this same file for future Bash terminals (and replace the old loader).
 # Keep setup variables and failure exits inside a subshell.
