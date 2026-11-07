@@ -60,12 +60,15 @@ separate from Neovim. Run it from this checkout:
 It automatically registers itself in `~/.bashrc`, replacing the old loader,
 and opens an interactive Bash shell with the aliases loaded. To set up or reload
 them in your **current** shell instead, run `source alias/setup.sh`. Future Bash
-terminals load them automatically. No separate installer or `jq` is needed.
+terminals load them automatically. No separate installer or `jq` is needed;
+the AI aliases use `python3` to look up saved Pi sessions.
 `ai-ie` changes the current shell's directory to `/home/umm/projects/ie-ai-2`, opens a
-separate GNOME Terminal window with three fresh Pi sessions named `review-commit`,
-`ideas`, and `worker`, then opens Neovim in the current terminal without waiting
-for those Pi sessions to finish. `ai-prac` does the same for
-`/home/umm/projects/ai-practice-py`, and `ai-floor` does the same for
+separate GNOME Terminal window with three Pi tabs named `review-commit`, `ideas`,
+and `worker`, then opens Neovim in the current terminal without waiting for Pi
+to finish. Each tab resumes the most recently modified saved session with that
+exact name **in that project**, including sessions previously created with
+`--name`. A new named session is created only if no match exists. `ai-prac` does
+the same for `/home/umm/projects/ai-practice-py`, and `ai-floor` does the same for
 `/home/umm/projects/aiFloor`, using the same three session names.
 
 ## Keybindings

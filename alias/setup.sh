@@ -18,35 +18,97 @@ alias ie-res='pnpm clear && pnpm i && pnpm build && pnpm dev'
 alias pewpew='source .venv/bin/activate'
 alias pew='deactivate'
 
+# Resume the latest session with this exact name in the current project.
+# Called in the Pi tab's shell; only create a session when none exists.
+pi-resume-named() {
+    local session
+    session=$(python3 - "$1" <<'PY'
+import json
+import os
+from pathlib import Path
+import re
+import sys
+
+cwd = Path.cwd()
+agent = Path(os.environ.get("PI_CODING_AGENT_DIR") or "~/.pi/agent").expanduser()
+custom = os.environ.get("PI_CODING_AGENT_SESSION_DIR")
+if not custom:
+    try:
+        custom = json.loads((agent / "settings.json").read_text()).get("sessionDir")
+    except FileNotFoundError:
+        pass
+if custom:
+    directory = Path(custom).expanduser().resolve()
+else:
+    encoded = "--" + re.sub(r"[/\\:]", "-", str(cwd)[1:]) + "--"
+    directory = agent / "sessions" / encoded
+
+candidates = []
+if directory.exists():
+    for path in directory.glob("*.jsonl"):
+        try:
+            candidates.append((path.stat().st_mtime_ns, path))
+        except FileNotFoundError:
+            pass
+for _, path in sorted(candidates, reverse=True):
+    try:
+        with path.open() as stream:
+            header = json.loads(next(stream, "{}"))
+            if not isinstance(header, dict) or header.get("type") != "session":
+                continue
+            if not header.get("cwd") or Path(header["cwd"]).resolve() != cwd:
+                continue
+            name = None
+            for line in stream:
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(entry, dict) and entry.get("type") == "session_info":
+                    name = entry.get("name")
+            if name == sys.argv[1]:
+                print(path.resolve())
+                break
+    except (FileNotFoundError, json.JSONDecodeError):
+        continue
+PY
+    ) || return
+    if [[ -n "$session" ]]; then
+        exec pi --session "$session"
+    else
+        exec pi --name "$1"
+    fi
+}
+
 # Launch three Pi tabs separately, then open Neovim in the current terminal.
 alias ai-ie='cd /home/umm/projects/ie-ai-2 && gnome-terminal \
     --window --working-directory=/home/umm/projects/ie-ai-2 --title=review-commit \
     -- bash -ic "
         gnome-terminal --tab --working-directory=/home/umm/projects/ie-ai-2 --title=ideas \\
-            -- bash -ic \"exec pi --name ideas\"
+            -- bash -ic \"pi-resume-named ideas\"
         gnome-terminal --tab --working-directory=/home/umm/projects/ie-ai-2 --title=worker \\
-            -- bash -ic \"exec pi --name worker\"
-        exec pi --name review-commit
-    " && nvim'
+            -- bash -ic \"pi-resume-named worker\"
+        pi-resume-named review-commit
+    " && conda activate ie-ai-2 && nvim'
 
 alias ai-prac='cd /home/umm/projects/ai-practice-py && gnome-terminal \
     --window --working-directory=/home/umm/projects/ai-practice-py --title=review-commit \
     -- bash -ic "
         gnome-terminal --tab --working-directory=/home/umm/projects/ai-practice-py --title=ideas \\
-            -- bash -ic \"exec pi --name ideas\"
+            -- bash -ic \"pi-resume-named ideas\"
         gnome-terminal --tab --working-directory=/home/umm/projects/ai-practice-py --title=worker \\
-            -- bash -ic \"exec pi --name worker\"
-        exec pi --name review-commit
+            -- bash -ic \"pi-resume-named worker\"
+        pi-resume-named review-commit
     " && nvim'
 
 alias ai-floor='cd /home/umm/projects/aiFloor && gnome-terminal \
     --window --working-directory=/home/umm/projects/aiFloor --title=review-commit \
     -- bash -ic "
         gnome-terminal --tab --working-directory=/home/umm/projects/aiFloor --title=ideas \\
-            -- bash -ic \"exec pi --name ideas\"
+            -- bash -ic \"pi-resume-named ideas\"
         gnome-terminal --tab --working-directory=/home/umm/projects/aiFloor --title=worker \\
-            -- bash -ic \"exec pi --name worker\"
-        exec pi --name review-commit
+            -- bash -ic \"pi-resume-named worker\"
+        pi-resume-named review-commit
     " && nvim'
 
 # Register this same file for future Bash terminals (and replace the old loader).
