@@ -5,7 +5,7 @@ vim.opt.termguicolors = true
 
 -- Basic quality of life settings
 vim.opt.number = true
-vim.opt.relativenumber = true
+vim.opt.relativenumber = false
 vim.opt.mouse = "a"
 -- Share copies, cuts, and pastes with desktop applications.
 vim.opt.clipboard = "unnamedplus"
