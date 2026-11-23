@@ -61,7 +61,8 @@ It automatically registers itself in `~/.bashrc`, replacing the old loader,
 and opens an interactive Bash shell with the aliases loaded. To set up or reload
 them in your **current** shell instead, run `source alias/setup.sh`. Future Bash
 terminals load them automatically. No separate installer or `jq` is needed;
-the AI aliases use `python3` to look up saved Pi sessions.
+the AI aliases use `python3` to look up saved Pi sessions. Each AI project alias
+runs `pi update` first and stops if the update fails.
 `ai-ie` changes the current shell's directory to `/home/umm/projects/ie-ai-2`, opens a
 separate GNOME Terminal window with three Pi tabs named `review-commit`, `ideas`,
 and `worker`, then opens Neovim in the current terminal without waiting for Pi

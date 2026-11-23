@@ -80,8 +80,8 @@ PY
     fi
 }
 
-# Launch three Pi tabs separately, then open Neovim in the current terminal.
-alias ai-ie='cd /home/umm/projects/ie-ai-2 && gnome-terminal \
+# Update Pi once before launching the three Pi tabs and Neovim.
+alias ai-ie='pi update && cd /home/umm/projects/ie-ai-2 && gnome-terminal \
     --window --working-directory=/home/umm/projects/ie-ai-2 --title=review-commit \
     -- bash -ic "
         gnome-terminal --tab --working-directory=/home/umm/projects/ie-ai-2 --title=ideas \\
@@ -91,7 +91,7 @@ alias ai-ie='cd /home/umm/projects/ie-ai-2 && gnome-terminal \
         pi-resume-named review-commit
     " && conda activate ie-ai-2 && nvim'
 
-alias ai-prac='cd /home/umm/projects/ai-practice-py && gnome-terminal \
+alias ai-prac='pi update && cd /home/umm/projects/ai-practice-py && gnome-terminal \
     --window --working-directory=/home/umm/projects/ai-practice-py --title=review-commit \
     -- bash -ic "
         gnome-terminal --tab --working-directory=/home/umm/projects/ai-practice-py --title=ideas \\
@@ -101,7 +101,7 @@ alias ai-prac='cd /home/umm/projects/ai-practice-py && gnome-terminal \
         pi-resume-named review-commit
     " && nvim'
 
-alias ai-floor='cd /home/umm/projects/aiFloor && gnome-terminal \
+alias ai-floor='pi update && cd /home/umm/projects/aiFloor && gnome-terminal \
     --window --working-directory=/home/umm/projects/aiFloor --title=review-commit \
     -- bash -ic "
         gnome-terminal --tab --working-directory=/home/umm/projects/aiFloor --title=ideas \\
