@@ -19,9 +19,16 @@ vim.lsp.config("lua_ls", {
   },
 })
 
--- Honor shell activation, or discover a project .venv (for example after uv sync).
--- Select the interpreter before Pyright starts resolving imports.
+-- A Conda declaration can also mark the root of a Python workspace.
+local python_roots = vim.deepcopy(vim.lsp.config.pyright.root_markers)
+for index, marker in ipairs(python_roots) do
+  if marker == ".git" then
+    python_roots[index] = { "environment.yml", "environment.yaml", ".git" }
+    break
+  end
+end
 vim.lsp.config("pyright", {
+  root_markers = python_roots,
   before_init = function(_, config)
     local python = config.settings.python
     if python.pythonPath then return end
