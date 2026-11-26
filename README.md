@@ -42,12 +42,11 @@ Conda base or Python on `PATH`. Set up the project's dependencies once; opening
 a project with a discoverable environment does not require manual activation.
 `:LspPyrightSetPythonPath /path/to/python` is available for a manual override.
 
-Error Lens-style messages display LSP diagnostics; they do
-not install or resolve dependencies themselves. Diagnostics update while typing,
-and LSP file watching is enabled so creating, editing, or deleting imported
-modules on disk also triggers an update. Neovim 0.11's fallback watcher has a
-compatibility fix for newly created files being mislabeled as edits. You do not
-need to close tabs or restart Neovim for ordinary code/import fixes. If a server
+Error Lens-style messages update as Pyright checks edits. Neovim also checks
+visible files for external changes automatically and reloads them only if the
+buffer has no unsaved edits. LSP file watching separately tracks imported files
+created, edited, or deleted on disk. Neovim 0.11's fallback watcher has a
+compatibility fix for newly created files being mislabeled as edits. If a server
 gets stuck, use `:LspRestart` to restart it without closing your tabs. Go/Rust and
 other optional languages need their corresponding servers, formatters, and
 toolchains.

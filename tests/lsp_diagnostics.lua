@@ -5,6 +5,7 @@ vim.opt.rtp:append(vim.fn.stdpath("data") .. "/lazy/blink.cmp")
 vim.env.PATH = vim.fn.stdpath("data") .. "/mason/bin:" .. vim.env.PATH
 package.path = "./lua/?.lua;" .. package.path
 assert(vim.fn.executable("pyright-langserver") == 1, "Install Pyright with :MasonInstall pyright")
+require("core.cmd")
 require("core.diagnostics")
 require("plugins.lsp")
 
@@ -30,6 +31,18 @@ local ok, err = xpcall(function()
 
   wait_for("reportAssignmentType", true, "initial type error")
   local client_id = vim.lsp.get_clients({ bufnr = buf, name = "pyright" })[1].id
+  local replacement = root .. "/replacement.py"
+  vim.fn.writefile({ "value: int = 1" }, replacement)
+  assert(vim.uv.fs_rename(replacement, root .. "/main.py"))
+  wait_for("reportAssignmentType", false, "external replacement of open file clears error automatically")
+  assert(vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == "value: int = 1", "buffer follows disk")
+  -- Disable autosave on this fixture so the following assertions exercise unsaved edits.
+  vim.bo[buf].readonly = true
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, { 'value: int = "wrong"' })
+  wait_for("reportAssignmentType", true, "unsaved edit produces a diagnostic")
+  vim.fn.writefile({ "value: int = 22" }, root .. "/main.py")
+  assert(not vim.wait(1200, function() return not vim.bo[buf].modified end, 50), "reload keeps local edits")
+  assert(vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == 'value: int = "wrong"')
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "value: int = 1" })
   wait_for("reportAssignmentType", false, "fixed type error clears without saving")
   assert(vim.bo[buf].modified, "test unsaved live updates, not save-triggered diagnostics")

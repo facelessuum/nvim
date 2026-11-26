@@ -1,3 +1,32 @@
+-- Refresh visible files changed by another tool, even while Neovim is idle.
+vim.opt.autoread = true
+local reload_group = vim.api.nvim_create_augroup("AutoRead", { clear = true })
+local function refresh_visible_files()
+  local mode = vim.api.nvim_get_mode().mode
+  if mode:match("^[cRr!t]") then return end
+  local checked = {}
+  for _, window in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    local buf = vim.api.nvim_win_get_buf(window)
+    local opts = vim.bo[buf]
+    if not checked[buf] and opts.buftype == "" and not opts.modified and vim.api.nvim_buf_get_name(buf) ~= "" then
+      checked[buf] = true
+      vim.cmd.checktime(buf)
+    end
+  end
+end
+
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
+  group = reload_group,
+  callback = function() vim.schedule(refresh_visible_files) end,
+})
+local reload_timer = assert(vim.uv.new_timer())
+reload_timer:start(1000, 1000, vim.schedule_wrap(refresh_visible_files))
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  group = reload_group,
+  once = true,
+  callback = function() reload_timer:close() end,
+})
+
 -- Save each buffer after typing has paused for 500 ms.
 local group = vim.api.nvim_create_augroup("AutoSave", { clear = true })
 local pending = {}
